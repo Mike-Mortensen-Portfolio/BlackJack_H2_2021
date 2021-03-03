@@ -70,7 +70,7 @@ class Deck {
         //// Returns all cards in the deck ///////////////////////////
         //////////////////////////////////////////////////////////////
         this.GetCards = function () { return cards; };
-        
+
         //// Returns a collection of the cards that have been ////////
         //// been drawen and is now discarded                 ////////
         //////////////////////////////////////////////////////////////
@@ -188,14 +188,15 @@ class Player extends Person{
 ////////////////////// Game UI ///////////////////////////////
 //////////////////////////////////////////////////////////////
 let drawButton = document.getElementById ("btn_draw");          //  The button to press when drawing a card
-let stopButton = document.getElementById("btn_stop");        //  The button to press when stopping players turn
+let stopButton = document.getElementById("btn_stop");           //  The button to press when stopping players turn
 let txtArea = document.getElementById ("txt_gameInfo");         //  The text area that contains the games progress
 let aceValue = document.getElementById ("btn_switchValue");     //  The button to press to switch the value between 1 and 11 for Aces
 let dealerPoints = document.getElementById ("dealerPoints");    //  The dealers scoreboard
 let playerPoints = document.getElementById ("playerPoints");    //  The players scoreboard
 
-////////////////////// Game Data ////////////////////////////
-/////////////////////////////////////////////////////////////
+////////////////////// Game Data /////////////////////////////
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 var ph = new CardHolder();                  //  The HTML card placeholder
 var deck = new Deck();                      //  The deck of cards
 var dealer = new Player (0, "Dealer");
@@ -204,6 +205,9 @@ let currentCard;                            //  The Currently displayed card
 let accepted = false;                       //  Whether or not the player accepted the value of an Ace
 let playersTurn = true;                     //  Whether or not the current turn is the players or the dealers
 let gameOver = false;
+var botDraw = {                //  Whether or not the bot is allowed to draw a new card
+    allowed: true
+};
 //#endregion
 
 //#region Initial Setup
@@ -214,32 +218,129 @@ deck.BuilDeck();
 deck.Shuffle();
 //#endregion
 
-////////// Draws a new card and resets the game ////////////
-////////// when there's no cards left as well   ////////////
-////////// as accepting the value of an Ace     ////////////
-////////////////////////////////////////////////////////////
+//#region Bot Logic
+//// Start the Botplayer (Dealer) ////////////////////////////
+//////////////////////////////////////////////////////////////
+async function StartBot (){
+    console.log ("<----Bot Initiated---->");
+    console.log ("      Allowed Draw: " + botDraw.allowed);
+    do{
+        console.log ("<----Bot Continued---->");
+        console.log ("      Allowed Draw: " + botDraw.allowed);
+        
+        if (botDraw.allowed == true){
+            botDraw.allowed = false;
+            DrawCard ();
+            console.log ("<----Bot Decision---->");
+            console.log ("      Allowed Draw: " + botDraw.allowed);
+            BotAceValueDecision();
+
+            if (BotStopDecision(dealer.Points, 70) == false)
+            {
+                txtArea.scrollTop = txtArea.scrollHeight;
+                if (dealer.Points > player.Points && dealer.Points < 21){
+                    EndTurn(player.Name + " lost!\n");
+                }
+                else if (dealer.Points < 21){
+                    EndTurn(player.Name + " won!\n");
+                }
+                
+                break;
+            }
+
+            let waitTime = Math.random () * (1500 - 1000) + 1000;
+            console.log ("      Wait Time: " + waitTime);
+            await new Promise (resolve => setTimeout (resolve, waitTime));
+
+            botDraw.allowed = true;
+        }
+
+    } while (dealer.Points < 21);
+
+    
+    playersTurn = true;
+    botDraw.allowed = true;
+    console.log ("<----Bot Sequence Over---->");
+    console.log ("      Players Turn: " + playersTurn);
+    console.log ("      Allowed Draw: " + botDraw.allowed);
+}
+
+//// Lets the bot decide what to do with an Ace //////////////
+//////////////////////////////////////////////////////////////
+function BotAceValueDecision (){
+    if (currentCard.Name.includes("Ace") == true){
+        if (aceValue.innerHTML == "Ace Value: 11" && (dealer.Points + 11) > 21)
+        {
+            SwitchValue();
+        }
+        else {
+            SwitchValue();
+        }
+
+        OnAccept();
+    }
+}
+
+//// Lets the bot decide when to stop drawing cards //////////
+//////////////////////////////////////////////////////////////
+//////// _points: The points to compare against //////////////
+////////          the _threshold                //////////////
+//////////////////////////////////////////////////////////////
+function BotStopDecision (_points, _threshold){
+    let proc = ((_points / 21) * 100);
+
+    console.log ("<----BotStopDecision()---->");
+    console.log ("      Procentage: " + _points + " / 21 * 100 = " + proc);
+    console.log ("      Threshold Met: " + !(proc <= _threshold));
+
+    if (proc <= _threshold ){
+
+        return true;
+    }
+    
+    return false;
+}
+//#endregion
+
+////////// Draws a new card and resets the game //////////////
+////////// when there's no cards left as well   //////////////
+////////// as accepting the value of an Ace     //////////////
+//////////////////////////////////////////////////////////////
 function DrawCard ()
 {
+    console.clear();
     if (drawButton.innerHTML != "Try Again"){
         if (drawButton.innerHTML != "Accept"){
-            currentCard  = deck.DrawCard();
+            currentCard = deck.DrawCard();
+
+            console.log ("<----OnDraw()---->");
+            console.log ("      Current Card: " + currentCard.ToString());
+            console.log ("      Accepted: " + accepted);
+            console.log ("      Players Turn: " + playersTurn);
+            console.log ("      Button Text: " + drawButton.innerHTML);
+
             ph.SetSource (currentCard.ImageUrl);
             
             if (playersTurn == true){
                 AddInfoToGameBoard(player)
+                SetAceButton();
             }
             else{
-             AddInfoToGameBoard (dealer);   
+                AddInfoToGameBoard (dealer);   
             }
-            
-            CheckIfAce();
         }
         else{
             OnAccept();
         }
 
+        console.log ("<----Post OnAccept()---->");
+        console.log ("      Current Card: " + currentCard.ToString());
+        console.log ("      Accepted: " + accepted);
+        console.log ("      Players Turn: " + playersTurn);
+        console.log ("      Button Text: " + drawButton.innerHTML);
+
         if (currentCard.Name.includes("Ace") == false || accepted == true){
-            if (playersTurn){
+            if (playersTurn == true){
                 CountPoints(player);
                 DisplayScore(playerPoints, player);
             }
@@ -248,6 +349,12 @@ function DrawCard ()
                 DisplayScore(dealerPoints, dealer);
             }
         }
+        
+        if (playersTurn == true)
+        {
+            TryEndTurnSuccess (player.Points, "");
+        }
+        
     }
     else{
         ResetGame();
@@ -255,29 +362,43 @@ function DrawCard ()
 
     if (playersTurn == true)
     {
-        EndGame (player.Points, "Player lost!");
+        TryEndTurnFailed (player.Points, player.Name + " lost!");
     }
     else{
-        EndGame (dealer.Points, "Player won!");
+        if (TryEndTurnFailed (dealer.Points,  player.Name + " won!") == false){
+            TryEndTurnSuccess (dealer.Points, player.Name + " Lost!");
+        }
     }
-
 }
 
 //// Enable or disable the Ace Value Button///////////////////
 //////////////////////////////////////////////////////////////
-function CheckIfAce (){
+function SetAceButton (){
     if (currentCard.Name.includes("Ace")){
         txtArea.scrollTop = txtArea.scrollHeight;
         txtArea.innerHTML += "Ace Counts as: " + aceValue.innerHTML.replace("Ace Value: ", "") + "\n";
+
+        if (aceValue.innerHTML == "Ace Value: 01"){
+            currentCard.Points = 1;
+        }
+        else{
+            currentCard.Points = 11;
+        }
+
         aceValue.disabled = false;
         drawButton.innerHTML = "Accept";
     }
     else{
         aceValue.disabled = true;
     }
+
+    console.log ("<----SetAceButton---->");
+    console.log ("      Current Card: " + currentCard.ToString());
+    console.log ("      Ace Value: " + aceValue.innerHTML.replace("Ace Value: ", ""));
+    console.log ("      Ace Butten Enabled: " + !aceValue.disabled);
 }
 
-//// Add the games progress to the gameboard //////////////////////////
+//// Add the games progress to the gameboard /////////////////
 //////////////////////////////////////////////////////////////
 //////// _player: The current playing player /////////////////
 //////////////////////////////////////////////////////////////
@@ -316,6 +437,22 @@ function OnAccept ()
     accepted = true;
     drawButton.innerHTML = "Draw Card";
     aceValue.disabled = true;
+
+    console.log ("<----OnAccept---->")
+    console.log("      Accepted: " + accepted);
+}
+
+//// End the current turn ////////////////////////////////////
+//////////////////////////////////////////////////////////////
+//////// _message: The message to display    /////////////////
+////////              on the gameboard       /////////////////
+//////////////////////////////////////////////////////////////
+function EndTurn (_message){
+    drawButton.innerHTML = "Try Again";
+    txtArea.scrollTop = txtArea.scrollHeight;
+    txtArea.innerHTML += _message + "\n";
+    stopButton.disabled = true;
+    drawButton.disabled = false;
 }
 
 //// Ends the game ///////////////////////////////////////////
@@ -326,15 +463,44 @@ function OnAccept ()
 ///////                    display when the   ////////////////
 ///////                    game ends          ////////////////
 //////////////////////////////////////////////////////////////
-function EndGame (_points, _gameOverMessage)
+function TryEndTurnFailed (_points, _message)
 {
+    console.log ("<----TryEndTurnFailed()---->");
+    console.log ("      Deck Size: " + deck.GetCards().length);
+    console.log ("      Points: " + _points);
+    console.log ("      Message: " + _message);
+
     if (deck.GetCards().length == 0 || _points > 21)
     {
-       drawButton.innerHTML = "Try Again";
-       txtArea.scrollTop = txtArea.scrollHeight;
-       txtArea.innerHTML += _gameOverMessage + "\n";
-       stopButton.disabled = true;
-       return true;
+        EndTurn (_message);
+        return true;
+    }
+
+    return false;
+}
+
+//// Ends the game ///////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+//////// _points: the points to check against ////////////////
+////------------------------------------------------------////
+//////// _gameOverMessage: The message to     ////////////////
+///////                    display when the   ////////////////
+///////                    game ends          ////////////////
+//////////////////////////////////////////////////////////////
+function TryEndTurnSuccess (_points, _message){
+    console.log ("<----TryEndTurnSuccess---->");
+    console.log ("      Players turns: " + playersTurn);
+    console.log ("      Points: " + _points);
+    console.log ("      Message: " + _message);
+
+    if (_points == 21 && playersTurn == false)
+    {
+        EndTurn (_message);
+        return true;
+    }
+    else if (_points == 21){
+        StopTurn();
+        return true;
     }
 
     return false;
@@ -350,8 +516,8 @@ function ResetGame ()
     stopButton.disabled = false;
     player.Points = 0;
     dealer.Points = 0;
-    playerPoints.innerHTML = player.Name + "Points: " + player.GetPointsAsDoubleDigitString();
-    dealerPoints.innerHTML = dealer.Name + "Points: " + dealer.GetPointsAsDoubleDigitString();
+    DisplayScore(playerPoints, player);
+    DisplayScore(dealerPoints, dealer);
     playersTurn = true;
 
     console.log ("      " + player.Name + " points: " + player.Points);
@@ -369,7 +535,7 @@ function ResetGame ()
 
 ////////// Switches the value of the displayed Ace ///////////
 //////////////////////////////////////////////////////////////
-function SwitchValue (){  
+function SwitchValue (){
     if (aceValue.innerHTML == "Ace Value: 01"){
         aceValue.innerHTML = "Ace Value: 11";
         currentCard.Points = 11;
@@ -378,6 +544,10 @@ function SwitchValue (){
         aceValue.innerHTML = "Ace Value: 01";
         currentCard.Points = 1;
     }
+
+    console.log ("<----SwitchValue()---->");
+    console.log ("      Current Card: " + currentCard.ToString());
+
     txtArea.scrollTop = txtArea.scrollHeight;
     txtArea.innerHTML += "Ace Counts as: " + aceValue.innerHTML.replace("Ace Value: ", "") + "\n";
 }
@@ -388,14 +558,18 @@ function SwitchValue (){
 function StopTurn (){
     playersTurn = !playersTurn;
 
+    console.log("Switching turn");
     txtArea.scrollTop = txtArea.scrollHeight;
     if (playersTurn == true){
         txtArea.innerHTML +=  "Turn given to: " + player.Name + "\n";
     }
     else{
+        drawButton.disabled = true;
+        stopButton.disabled = true;
+        
         txtArea.innerHTML +=  "Turn given to: " + dealer.Name + "\n";
-    }
 
-    stopButton.disabled = true;
+        StartBot();
+    }
 }
 //#endregion
