@@ -187,35 +187,63 @@ class Player extends Person{
 //#region Data Fields
 ////////////////////// Game UI ///////////////////////////////
 //////////////////////////////////////////////////////////////
-let drawButton = document.getElementById ("btn_draw");          //  The button to press when drawing a card
-let stopButton = document.getElementById("btn_stop");           //  The button to press when stopping players turn
-let txtArea = document.getElementById ("txt_gameInfo");         //  The text area that contains the games progress
-let aceValue = document.getElementById ("btn_switchValue");     //  The button to press to switch the value between 1 and 11 for Aces
-let dealerPoints = document.getElementById ("dealerPoints");    //  The dealers scoreboard
-let playerPoints = document.getElementById ("playerPoints");    //  The players scoreboard
+let drawButton = document.getElementById ("btn_draw");              //  The button to press when drawing a card
+let stopButton = document.getElementById("btn_stop");               //  The button to press when stopping players turn
+let txtArea = document.getElementById ("txt_gameInfo");             //  The text area that contains the games progress
+let aceValue = document.getElementById ("btn_switchValue");         //  The button to press to switch the value between 1 and 11 for Aces
+let dealerPoints = document.getElementById ("dealerPoints");        //  The dealers scoreboard
+let playerPoints = document.getElementById ("playerPoints");        //  The players scoreboard
+//#region Checking UI Elements
+let abortExecution = false;
+try{
+    if (drawButton == undefined){
+        throw "drawButton not found!";
+    }
+    if (stopButton == undefined){
+        throw "stopButton not found!";
+    }
+    if (txtArea == undefined){
+        throw "txtArea not found!";
+    }
+    if (aceValue == undefined){
+        throw "aceValue not found!";
+    }
+    if (dealerPoints == undefined){
+        throw "dealerPoints not found!";
+    }
+    if (playerPoints == undefined){
+        throw "playerPoints not found!";
+    }
+}
+catch (err){
+    console.error("ERROR: " + err + "\nGame stopped!");
+    abortExecution = true;
+}
+//#endregion
 
 ////////////////////// Game Data /////////////////////////////
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
-var ph = new CardHolder();                  //  The HTML card placeholder
-var deck = new Deck();                      //  The deck of cards
+var ph = new CardHolder();                                          //  The HTML card placeholder
+var deck = new Deck();                                              //  The deck of cards
 var dealer = new Player (0, "Dealer");
-var player = new Player (1, "Player");
-let currentCard;                            //  The Currently displayed card
-let accepted = false;                       //  Whether or not the player accepted the value of an Ace
-let playersTurn = true;                     //  Whether or not the current turn is the players or the dealers
-let gameOver = false;
-var botDraw = {                //  Whether or not the bot is allowed to draw a new card
+var player = new Player (1, localStorage.getItem("PlayerName"));
+let currentCard;                                                    //  The Currently displayed card
+let accepted = false;                                               //  Whether or not the player accepted the value of an Ace
+let playersTurn = true;                                             //  Whether or not the current turn is the players or the dealers
+var botDraw = {                                                     //  Whether or not the bot is allowed to draw a new card
     allowed: true
 };
 //#endregion
 
 //#region Initial Setup
-txtArea.innerHTML = "Welcome to Oiski's Blackjack Table!\n";
-dealerPoints.innerHTML = dealer.Name + " Points: " + dealer.GetPointsAsDoubleDigitString();
-playerPoints.innerHTML = player.Name + " Points: " + player.GetPointsAsDoubleDigitString();
-deck.BuilDeck();
-deck.Shuffle();
+if (abortExecution == false){
+    txtArea.innerHTML = "Welcome to Oiski's Blackjack Table!\n";
+    dealerPoints.innerHTML = dealer.Name + " Points: " + dealer.GetPointsAsDoubleDigitString();
+    playerPoints.innerHTML = player.Name + " Points: " + player.GetPointsAsDoubleDigitString();
+    deck.BuilDeck();
+    deck.Shuffle();
+}
 //#endregion
 
 //#region Bot Logic
@@ -227,18 +255,19 @@ async function StartBot (){
     do{
         console.log ("<----Bot Continued---->");
         console.log ("      Allowed Draw: " + botDraw.allowed);
+        console.log ("      Points: " + dealer.Points);
         
         if (botDraw.allowed == true){
             botDraw.allowed = false;
             DrawCard ();
             console.log ("<----Bot Decision---->");
             console.log ("      Allowed Draw: " + botDraw.allowed);
-            BotAceValueDecision();
+            //BotAceValueDecision();
 
-            if (BotStopDecision(dealer.Points, 70) == false)
+            if (BotStopDecision(dealer.Points, 79) == false)
             {
                 txtArea.scrollTop = txtArea.scrollHeight;
-                if (dealer.Points > player.Points && dealer.Points < 21){
+                if (dealer.Points >= player.Points && dealer.Points < 21){
                     EndTurn(player.Name + " lost!\n");
                 }
                 else if (dealer.Points < 21){
@@ -268,16 +297,38 @@ async function StartBot (){
 //// Lets the bot decide what to do with an Ace //////////////
 //////////////////////////////////////////////////////////////
 function BotAceValueDecision (){
+
+    console.log ("<----Bot Ace Evalutation---->");
+
     if (currentCard.Name.includes("Ace") == true){
+
+        if (aceValue.innerHTML == "Ace Value: 01"){
+            currentCard.Points = 1;
+        }
+        else{
+            currentCard.Points = 11;
+        }
+        console.log ("      Card Point: " + currentCard.Points);
+
         if (aceValue.innerHTML == "Ace Value: 11" && (dealer.Points + 11) > 21)
         {
             SwitchValue();
+            console.log ("      Switched to 11 to: " + currentCard.Points);
         }
-        else {
+        else if (aceValue.innerHTML == "Ace Value: 01" && (dealer.Points + 11) <= 21){
             SwitchValue();
+            console.log ("      Switched from 1 to: " + currentCard.Points);
+        }
+        else{
+            txtArea.scrollTop = txtArea.scrollHeight;
+            txtArea.innerHTML += "Ace Counts as: " + aceValue.innerHTML.replace("Ace Value: ", "") + "\n";
+            console.log ("      Stayed on: " + currentCard.Points);
         }
 
         OnAccept();
+    }
+    else{
+        console.log ("      No Ace to Evaluate");
     }
 }
 
@@ -308,65 +359,76 @@ function BotStopDecision (_points, _threshold){
 //////////////////////////////////////////////////////////////
 function DrawCard ()
 {
-    console.clear();
-    if (drawButton.innerHTML != "Try Again"){
-        if (drawButton.innerHTML != "Accept"){
-            currentCard = deck.DrawCard();
+    if (abortExecution == false){
+        if (drawButton.innerHTML != "Try Again"){
+            if (drawButton.innerHTML != "Accept"){
+                currentCard = deck.DrawCard();
 
-            console.log ("<----OnDraw()---->");
+                console.log ("<----OnDraw()---->");
+                console.log ("      Current Card: " + currentCard.ToString());
+                console.log ("      Accepted: " + accepted);
+                console.log ("      Players Turn: " + playersTurn);
+                console.log ("      Button Text: " + drawButton.innerHTML);
+
+                ph.SetSource (currentCard.ImageUrl);
+                
+                if (playersTurn == true){
+                    AddInfoToGameBoard(player)
+                    SetAceButton();
+                }
+                else{
+                    AddInfoToGameBoard (dealer);
+                    BotAceValueDecision ();
+                }
+            }
+            else{
+                OnAccept();
+            }
+
+            console.log ("<----About to Count Points---->");
             console.log ("      Current Card: " + currentCard.ToString());
             console.log ("      Accepted: " + accepted);
             console.log ("      Players Turn: " + playersTurn);
             console.log ("      Button Text: " + drawButton.innerHTML);
 
-            ph.SetSource (currentCard.ImageUrl);
+            console.log ("<----Counted Points---->")
+            if (currentCard.Name.includes("Ace") == false || accepted == true){
+                if (playersTurn == true){
+                    console.log ("      Points Before: " + dealer.Points);
+                    CountPoints(player);
+                    console.log ("      Points After: " + dealer.Points);
+                    DisplayScore(playerPoints, player);
+                }
+                else{
+                    console.log ("      Points Before: " + dealer.Points);
+                    CountPoints (dealer);
+                    console.log ("      Points After: " + dealer.Points);
+                    DisplayScore(dealerPoints, dealer);
+                }
+                
+                console.log ("      Players Turn: " + playersTurn);
+                console.log ("      Card: " + currentCard);
+            }
             
-            if (playersTurn == true){
-                AddInfoToGameBoard(player)
-                SetAceButton();
+            if (playersTurn == true)
+            {
+                TryEndTurnSuccess (player.Points, "");
             }
-            else{
-                AddInfoToGameBoard (dealer);   
-            }
+            
         }
         else{
-            OnAccept();
+            console.clear();
+            ResetGame();
         }
 
-        console.log ("<----Post OnAccept()---->");
-        console.log ("      Current Card: " + currentCard.ToString());
-        console.log ("      Accepted: " + accepted);
-        console.log ("      Players Turn: " + playersTurn);
-        console.log ("      Button Text: " + drawButton.innerHTML);
-
-        if (currentCard.Name.includes("Ace") == false || accepted == true){
-            if (playersTurn == true){
-                CountPoints(player);
-                DisplayScore(playerPoints, player);
-            }
-            else{
-                CountPoints (dealer);
-                DisplayScore(dealerPoints, dealer);
-            }
-        }
-        
         if (playersTurn == true)
         {
-            TryEndTurnSuccess (player.Points, "");
+            TryEndTurnFailed (player.Points, player.Name + " lost!");
         }
-        
-    }
-    else{
-        ResetGame();
-    }
-
-    if (playersTurn == true)
-    {
-        TryEndTurnFailed (player.Points, player.Name + " lost!");
-    }
-    else{
-        if (TryEndTurnFailed (dealer.Points,  player.Name + " won!") == false){
-            TryEndTurnSuccess (dealer.Points, player.Name + " Lost!");
+        else{
+            if (TryEndTurnFailed (dealer.Points,  player.Name + " won!") == false){
+                TryEndTurnSuccess (dealer.Points, player.Name + " Lost!");
+            }
         }
     }
 }
@@ -556,20 +618,22 @@ function SwitchValue (){
 ////////// to the other player                    ////////////
 //////////////////////////////////////////////////////////////
 function StopTurn (){
-    playersTurn = !playersTurn;
+    if (abortExecution == false){
+        playersTurn = !playersTurn;
 
-    console.log("Switching turn");
-    txtArea.scrollTop = txtArea.scrollHeight;
-    if (playersTurn == true){
-        txtArea.innerHTML +=  "Turn given to: " + player.Name + "\n";
-    }
-    else{
-        drawButton.disabled = true;
-        stopButton.disabled = true;
-        
-        txtArea.innerHTML +=  "Turn given to: " + dealer.Name + "\n";
+        console.log("Switching turn");
+        txtArea.scrollTop = txtArea.scrollHeight;
+        if (playersTurn == true){
+            txtArea.innerHTML +=  "Turn given to: " + player.Name + "\n";
+        }
+        else{
+            drawButton.disabled = true;
+            stopButton.disabled = true;
+            
+            txtArea.innerHTML +=  "Turn given to: " + dealer.Name + "\n";
 
-        StartBot();
+            StartBot();
+        }
     }
 }
 //#endregion
