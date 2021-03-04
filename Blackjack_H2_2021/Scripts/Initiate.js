@@ -22,10 +22,14 @@ function Validate ()
     return false;
 }
 
+//// Redirects to the Index.html page ////////////////////////
+//////////////////////////////////////////////////////////////
 function ToIndex (){
     window.location.href = "./index.html";
 }
 
+//// Redirect to the GamePage.html page //////////////////////
+//////////////////////////////////////////////////////////////
 function ToGamePage (){
     window.location.href = "./gamePage.html";
 }
@@ -39,36 +43,64 @@ class Timer{
         var hours = 0;
         var run = true;
 
+        //// Get the current second count ////////////////////////////
+        //////////////////////////////////////////////////////////////
         this.GetSeconds = function (){
             return seconds;
         }
 
+        //// Get the current minute count ////////////////////////////
+        //////////////////////////////////////////////////////////////
         this.GetMinutes = function (){
             return minutes;
         }
 
+        //// Get the current hour count ////////////////////////////
+        //////////////////////////////////////////////////////////////
         this.GetHours = function (){
             return hours;
         }
 
-        this.GetSecondsWithDigets = function (_digits = 2){
-            return seconds.toLocaleString("en-US", { minimumIntegerDigits: _digits, useGrouping: false});
+        //// Get the current second count as a double digit ///////////
+        ////  format string                                 //////////
+        //////////////////////////////////////////////////////////////
+        this.GetSecondsWithDigets = function (){
+            return seconds.toLocaleString("en-US", { minimumIntegerDigits: 2, useGrouping: false});
         }
 
-        this.GetMinutesWithDigets = function (_digits = 2){
-            return minutes.toLocaleString("en-US", { minimumIntegerDigits: _digits, useGrouping: false});
+        //// Get the current minute count as a double digit //////////
+        ////  format string                                 //////////
+        //////////////////////////////////////////////////////////////
+        this.GetMinutesWithDigets = function (){
+            return minutes.toLocaleString("en-US", { minimumIntegerDigits: 2, useGrouping: false});
         }
 
-        this.GetHoursWithDigets = function (_digits = 2){
-            return hours.toLocaleString("en-US", { minimumIntegerDigits: _digits, useGrouping: false});
+        //// Get the current hour count as a double digit  ///////////
+        ////  format string                                 //////////
+        //////////////////////////////////////////////////////////////
+        this.GetHoursWithDigets = function (){
+            return hours.toLocaleString("en-US", { minimumIntegerDigits: 2, useGrouping: false});
         }
         
+        //// Get the current time as a formated string ///////////////
+        //////////////////////////////////////////////////////////////
         this.GetAsString = function (){
             return `${this.GetHoursWithDigets(2)}:${this.GetMinutesWithDigets(2)}:${this.GetSecondsWithDigets(2)}`;
         }
 
-        this.Start = async function (_shouldLog = false){
+        //// Starts the timer ////////////////////////////////////////
+        //////////////////////////////////////////////////////////////
+        //////// _associatedUIID: The ID of the HTML element that ////
+        ////////                  the timer should output to      ////
+        ////------------------------------------------------------////
+        //////// _shouldLog: Whether or not the timer should      ////
+        ////////             output to the console                ////
+        //////////////////////////////////////////////////////////////
+        this.Start = async function (_associatedUIID = undefined, _shouldLog = false){
             run = true;
+
+            let UI = document.getElementById (_associatedUIID);
+
             do {
                 if (run == false){
                     break;
@@ -76,6 +108,11 @@ class Timer{
                 if (_shouldLog == true){
                     console.log(this.GetAsString());
                 }
+
+                if (UI != undefined){
+                    UI.innerHTML = this.GetAsString();
+                }
+
                 await new Promise (resolve => {setTimeout (resolve, 1000)});
                 seconds++;
 
@@ -91,9 +128,18 @@ class Timer{
             }while (true);
         }
 
+        //// Stop the timer //////////////////////////////////////////
+        //////////////////////////////////////////////////////////////
         this.Stop = function (_shouldLog){
             run = false;
             console.log ("Timer Stopped");
         }
     }
+}
+
+//// Executed when the pages is loaded ///////////////////////
+//// This simply starts a timer        ///////////////////////
+//////////////////////////////////////////////////////////////
+window.onload = function (){
+    new Timer ().Start ("clock");
 }
