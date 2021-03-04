@@ -253,16 +253,17 @@ async function StartBot (){
     console.log ("<----Bot Initiated---->");
     console.log ("      Allowed Draw: " + botDraw.allowed);
     do{
+        //#region Debug
         console.log ("<----Bot Continued---->");
         console.log ("      Allowed Draw: " + botDraw.allowed);
         console.log ("      Points: " + dealer.Points);
+        //#endregion
         
         if (botDraw.allowed == true){
             botDraw.allowed = false;
             DrawCard ();
             console.log ("<----Bot Decision---->");
             console.log ("      Allowed Draw: " + botDraw.allowed);
-            //BotAceValueDecision();
 
             if (BotStopDecision(dealer.Points, 79) == false)
             {
@@ -289,9 +290,12 @@ async function StartBot (){
     
     playersTurn = true;
     botDraw.allowed = true;
+
+    //#region Debug
     console.log ("<----Bot Sequence Over---->");
     console.log ("      Players Turn: " + playersTurn);
     console.log ("      Allowed Draw: " + botDraw.allowed);
+    //#endregion
 }
 
 //// Lets the bot decide what to do with an Ace //////////////
@@ -310,16 +314,15 @@ function BotAceValueDecision (){
         }
         console.log ("      Card Point: " + currentCard.Points);
 
-        if (aceValue.innerHTML == "Ace Value: 11" && (dealer.Points + 11) > 21)
-        {
+        if (aceValue.innerHTML == "Ace Value: 11" && (dealer.Points + 11) > 21){    //  If the current ace value is 11 and would make the bot lose, switch
             SwitchValue();
             console.log ("      Switched to 11 to: " + currentCard.Points);
         }
-        else if (aceValue.innerHTML == "Ace Value: 01" && (dealer.Points + 11) <= 21){
+        else if (aceValue.innerHTML == "Ace Value: 01" && (dealer.Points + 11) <= 21){  //  If the current ace value is 1 and 11 would not make the bot lose, switch
             SwitchValue();
             console.log ("      Switched from 1 to: " + currentCard.Points);
         }
-        else{
+        else{   //  If the current ace value is 11 and 11 wouldnt make the bot lose, stay on 11. Or if the current ace value is 1 and 11 would make the bot lose, stay on 1.
             txtArea.scrollTop = txtArea.scrollHeight;
             txtArea.innerHTML += "Ace Counts as: " + aceValue.innerHTML.replace("Ace Value: ", "") + "\n";
             console.log ("      Stayed on: " + currentCard.Points);
@@ -340,9 +343,11 @@ function BotAceValueDecision (){
 function BotStopDecision (_points, _threshold){
     let proc = ((_points / 21) * 100);
 
+    //#region Debug
     console.log ("<----BotStopDecision()---->");
     console.log ("      Procentage: " + _points + " / 21 * 100 = " + proc);
     console.log ("      Threshold Met: " + !(proc <= _threshold));
+    //#endregion
 
     if (proc <= _threshold ){
 
@@ -364,11 +369,13 @@ function DrawCard ()
             if (drawButton.innerHTML != "Accept"){
                 currentCard = deck.DrawCard();
 
+                //#region  Debug
                 console.log ("<----OnDraw()---->");
                 console.log ("      Current Card: " + currentCard.ToString());
                 console.log ("      Accepted: " + accepted);
                 console.log ("      Players Turn: " + playersTurn);
                 console.log ("      Button Text: " + drawButton.innerHTML);
+                //#endregion
 
                 ph.SetSource (currentCard.ImageUrl);
                 
@@ -385,11 +392,13 @@ function DrawCard ()
                 OnAccept();
             }
 
+            //#region Debug
             console.log ("<----About to Count Points---->");
             console.log ("      Current Card: " + currentCard.ToString());
             console.log ("      Accepted: " + accepted);
             console.log ("      Players Turn: " + playersTurn);
             console.log ("      Button Text: " + drawButton.innerHTML);
+            //#endregion
 
             console.log ("<----Counted Points---->")
             if (currentCard.Name.includes("Ace") == false || accepted == true){
@@ -454,10 +463,12 @@ function SetAceButton (){
         aceValue.disabled = true;
     }
 
+    //#region Debug
     console.log ("<----SetAceButton---->");
     console.log ("      Current Card: " + currentCard.ToString());
     console.log ("      Ace Value: " + aceValue.innerHTML.replace("Ace Value: ", ""));
     console.log ("      Ace Butten Enabled: " + !aceValue.disabled);
+    //#endregion
 }
 
 //// Add the games progress to the gameboard /////////////////
@@ -527,10 +538,12 @@ function EndTurn (_message){
 //////////////////////////////////////////////////////////////
 function TryEndTurnFailed (_points, _message)
 {
+    //#region Debug
     console.log ("<----TryEndTurnFailed()---->");
     console.log ("      Deck Size: " + deck.GetCards().length);
     console.log ("      Points: " + _points);
     console.log ("      Message: " + _message);
+    //#endregion
 
     if (deck.GetCards().length == 0 || _points > 21)
     {
@@ -550,10 +563,12 @@ function TryEndTurnFailed (_points, _message)
 ///////                    game ends          ////////////////
 //////////////////////////////////////////////////////////////
 function TryEndTurnSuccess (_points, _message){
+    //#region Debug
     console.log ("<----TryEndTurnSuccess---->");
     console.log ("      Players turns: " + playersTurn);
     console.log ("      Points: " + _points);
     console.log ("      Message: " + _message);
+    //#endregion
 
     if (_points == 21 && playersTurn == false)
     {
@@ -582,11 +597,13 @@ function ResetGame ()
     DisplayScore(dealerPoints, dealer);
     playersTurn = true;
 
+    //#region Debug
     console.log ("      " + player.Name + " points: " + player.Points);
     console.log ("      " + dealer.Name + " points: " + dealer.Points);
     console.log ("      Player scoreboard: " + playerPoints.innerHTML);
     console.log ("      Dealer scoreboard: " + dealerPoints.innerHTML);
     console.log ("      Players turn: " + playersTurn);
+    //#endregion
 
     ph.SetSource ("./Images/GameBoard.jpg");
     deck.BuilDeck();
