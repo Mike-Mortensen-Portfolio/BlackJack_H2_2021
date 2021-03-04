@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Oiski's Blackjack Table</title>
+        <title>Blackjack H2 2021</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     </head>
     <body style="background-color: darkgreen; color:white;">
@@ -23,7 +23,7 @@
             <!-- Form -->
             <div class="row">
                 <div class="col-md-4"></div>
-                <form name="startGameForm" class="col-md-4 row" onsubmit="return StartGame()" method="post">
+                <form name="startGameForm" class="col-md-4 row" onsubmit="return Validate()" method="post">
                     <div class="row">
                         <div class="col-md-6">
                             <label>Player Name</label>
@@ -41,5 +41,5 @@
         </div>
     </body>
 
-    <script src="./Scripts/InitiateGame.js"></script>
+    <script src="./Scripts/Initiate.js"></script>
 </html>

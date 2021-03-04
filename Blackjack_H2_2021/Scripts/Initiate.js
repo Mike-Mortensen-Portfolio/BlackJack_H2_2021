@@ -1,8 +1,8 @@
 //// Validates the form and redirects to the /////////////////
 //// Game Page. If the form is invalid, this will alert //////
-//// the user instead and wait for another submission   //////
+//// the user and wait for another submission           //////
 //////////////////////////////////////////////////////////////
-function StartGame ()
+function Validate ()
 {
     var nameBox = document.forms ["startGameForm"]["fPlayerName"];
 
@@ -16,8 +16,16 @@ function StartGame ()
     }
     else{
         localStorage.setItem ("PlayerName", nameBox.value);
-        window.location.href = "./gamePage.html";
+        ToGamePage();
     }
     
     return false;
+}
+
+function ToIndex (){
+    window.location.href = "./index.html";
+}
+
+function ToGamePage (){
+    window.location.href = "./gamePage.html";
 }
