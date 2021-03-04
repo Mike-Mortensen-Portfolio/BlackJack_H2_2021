@@ -394,9 +394,9 @@ function DrawCard ()
             console.log ("<----Counted Points---->")
             if (currentCard.Name.includes("Ace") == false || accepted == true){
                 if (playersTurn == true){
-                    console.log ("      Points Before: " + dealer.Points);
+                    console.log ("      Points Before: " + player.Points);
                     CountPoints(player);
-                    console.log ("      Points After: " + dealer.Points);
+                    console.log ("      Points After: " + player.Points);
                     DisplayScore(playerPoints, player);
                 }
                 else{
@@ -407,7 +407,7 @@ function DrawCard ()
                 }
                 
                 console.log ("      Players Turn: " + playersTurn);
-                console.log ("      Card: " + currentCard);
+                console.log ("      Card: " + currentCard.ToString());
             }
             
             if (playersTurn == true)
@@ -621,7 +621,7 @@ function StopTurn (){
     if (abortExecution == false){
         playersTurn = !playersTurn;
 
-        console.log("Switching turn");
+        console.log("<--------------------------------Switching turn-------------------------------->");
         txtArea.scrollTop = txtArea.scrollHeight;
         if (playersTurn == true){
             txtArea.innerHTML +=  "Turn given to: " + player.Name + "\n";
