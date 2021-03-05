@@ -8,8 +8,8 @@ The assignments states that we must develop a simple Blackjack game that should 
 The rules are as follows:
 > The core intention is to get as close to 21 as possible by drawing cards and adding their score together.
 > You may stop drawing cards at any time, or if your total hand value exceeds 21.
-> Aces can have a value of 1 or 11, where's courtcards have a value of 10 and suitcards simply have their respective value.
-> Example: If you draw a 2 and a 3 your would have a total hand value of 5, but you if draw a king and a queen you have 20.
+> Aces can have a value of 1 or 11, where's courtcards have a value of 10 and suitcards simply have their respective value. \
+> Example: If you draw a 2 and a 3 your would have a total hand value of 5, but you if draw a king and a queen you have 20. \
 > If you want to continue (_which would be a poor choice, given that you have 20 and any cards besides Ace would make you exceed 21_) and get an ace
 > you can decide whether it should represent 1 or 11. In our case we would say 1, to land exactly on 21.
 > The dealer has some specieal rules and therefore can't stop before a hand total of 17 or higher is reached.
