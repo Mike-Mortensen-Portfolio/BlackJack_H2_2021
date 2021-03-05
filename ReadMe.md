@@ -90,4 +90,3 @@ The syntax for the structure of folders must be presented as: [DeveloperName]/[V
 5. [Oiski.School.ParkAndWash_H2_2021](https://github.com/Mike-Mortensen-Portfolio/Oiski.School.ParkAndWash_H2_2021)
 6. [Oiski.School.WPF_H2_2021](https://github.com/Mike-Mortensen-Portfolio/Oiski.School.WPF_H2_2021)
 7. [Oiski.School.EUCCoffeeShop_H2_2021](https://github.com/Mike-Mortensen-Portfolio/Oiski.School.EUCCoffeeShop_H2_2021)
-8. [Blackjack_H2_2021](https://github.com/Mike-Mortensen-Portfolio/Oiski.School.ToDo_H2_2021)
