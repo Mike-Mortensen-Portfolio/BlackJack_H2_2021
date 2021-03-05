@@ -1,7 +1,7 @@
 ﻿# Oiski's Blackjack Site
 
 ## About The Project
-This project was formed and written in relation to a school assignment, and as such written according to the specifications provided by that assignment. \
+This project was formed and written in relation to a school assignment, and as such written according to the specifications provided by that assignment.
 
 ### Terms of Development
 The assignments states that we must develop a simple Blackjack game that should feature a simple UI that lets the user interact with the game. \
