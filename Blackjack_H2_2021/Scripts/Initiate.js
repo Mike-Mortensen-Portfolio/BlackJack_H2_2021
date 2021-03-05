@@ -1,39 +1,4 @@
-//// Validates the form and redirects to the /////////////////
-//// Game Page. If the form is invalid, this will alert //////
-//// the user and wait for another submission           //////
-//////////////////////////////////////////////////////////////
-function Validate ()
-{
-    var nameBox = document.forms ["startGameForm"]["fPlayerName"];
-
-    if (nameBox == undefined)
-    {
-        alert ("No name box found!");
-    }
-
-    if (nameBox.value == undefined || nameBox.value.length > 6 || nameBox.value.includes (" ") || nameBox.value == ""){
-        alert ("You must type in a valid name to proceed!");
-    }
-    else{
-        localStorage.setItem ("PlayerName", nameBox.value);
-        ToGamePage();
-    }
-    
-    return false;
-}
-
-//// Redirects to the Index.html page ////////////////////////
-//////////////////////////////////////////////////////////////
-function ToIndex (){
-    window.location.href = "./index.html";
-}
-
-//// Redirect to the GamePage.html page //////////////////////
-//////////////////////////////////////////////////////////////
-function ToGamePage (){
-    window.location.href = "./gamePage.html";
-}
-
+//#region Class declarations
 //// Represents a timer that can be started and stopped ///////
 //////////////////////////////////////////////////////////////
 class Timer{
@@ -135,6 +100,43 @@ class Timer{
             console.log ("Timer Stopped");
         }
     }
+}
+//#endregion
+
+//// Validates the form and redirects to the /////////////////
+//// Game Page. If the form is invalid, this will alert //////
+//// the user and wait for another submission           //////
+//////////////////////////////////////////////////////////////
+function Validate ()
+{
+    var nameBox = document.forms ["startGameForm"]["fPlayerName"];
+
+    if (nameBox == undefined)
+    {
+        alert ("No name box found!");
+    }
+
+    if (nameBox.value == undefined || nameBox.value.length > 6 || nameBox.value.includes (" ") || nameBox.value == ""){
+        alert ("You must type in a valid name to proceed!");
+    }
+    else{
+        localStorage.setItem ("PlayerName", nameBox.value);
+        ToGamePage();
+    }
+    
+    return false;
+}
+
+//// Redirects to the Index.html page ////////////////////////
+//////////////////////////////////////////////////////////////
+function ToIndex (){
+    window.location.href = "./index.html";
+}
+
+//// Redirect to the GamePage.html page //////////////////////
+//////////////////////////////////////////////////////////////
+function ToGamePage (){
+    window.location.href = "./gamePage.html";
 }
 
 //// Executed when the pages is loaded ///////////////////////
