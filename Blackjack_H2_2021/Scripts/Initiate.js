@@ -139,9 +139,18 @@ function ToGamePage (){
     window.location.href = "./gamePage.html";
 }
 
+var timer = new Timer ();
+
 //// Executed when the pages is loaded ///////////////////////
-//// This simply starts a timer        ///////////////////////
+//// This simply starts the timer      ///////////////////////
 //////////////////////////////////////////////////////////////
 window.onload = function (){
-    new Timer ().Start ("clock");
+    timer.Start();
+}
+
+//// Executed when the pages is unloaded //////////////////////
+//// This simply stops the timer         /////////////////////
+//////////////////////////////////////////////////////////////
+window.onunload () = function (){
+    timer.Stop();
 }
