@@ -145,12 +145,5 @@ var timer = new Timer ();
 //// This simply starts the timer      ///////////////////////
 //////////////////////////////////////////////////////////////
 window.onload = function (){
-    timer.Start();
-}
-
-//// Executed when the pages is unloaded //////////////////////
-//// This simply stops the timer         /////////////////////
-//////////////////////////////////////////////////////////////
-window.onunload () = function (){
-    timer.Stop();
+    new Timer ().Start("clock");
 }
