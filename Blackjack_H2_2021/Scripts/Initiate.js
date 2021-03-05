@@ -139,7 +139,7 @@ function ToGamePage (){
     window.location.href = "./gamePage.html";
 }
 
-var timer = new Timer ();
+// var timer = new Timer ();
 
 //// Executed when the pages is loaded ///////////////////////
 //// This simply starts the timer      ///////////////////////
